@@ -6,7 +6,8 @@ import {
   QueryClient,
   QueryClientProvider,
   useQueries,
-  useMutation
+  useMutation,
+  keepPreviousData
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
@@ -19,9 +20,12 @@ const queryClient = new QueryClient({
   }
 });
 
-const fetchUserRepos = async (username: string) => {
+const fetchUserRepos = async (
+  username: string,
+  page: number = 1
+) => {
   const response = await fetch(
-    `https://api.github.com/users/${username}/repos?per_page=3`
+    `https://api.github.com/users/${username}/repos?per_page=3&page=${page}`
   );
   return response.json();
 };
@@ -33,10 +37,15 @@ interface UserRepositoriesProps {
 function UserRepositories({
   username
 }: UserRepositoriesProps) {
+  const [page, setPage] = useState(1);
   const { data: repos = [], isLoading } = useQuery({
-    queryKey: ["github", "repos", username],
-    queryFn: () => fetchUserRepos(username)
+    queryKey: ["github", "repos", username, page],
+    queryFn: () => fetchUserRepos(username, page),
+    placeholderData: keepPreviousData
   });
+
+  if (isLoading) return <div>Loading repositories...</div>;
+
   return (
     <div>
       <ul>
@@ -52,6 +61,26 @@ function UserRepositories({
           </li>
         ))}
       </ul>
+      {repos.length === 0 && <p>No repos found!</p>}
+      <div>
+        <button
+          onClick={() =>
+            setPage((old) => Math.max(old - 1, 1))
+          }
+          disabled={page === 1}
+        >
+          Previous Page
+        </button>
+        <span>Page {page}</span>
+        <button
+          onClick={() =>
+            setPage((old) => Math.max(old + 1))
+          }
+          disabled={repos.length < 3}
+        >
+          Next Page
+        </button>
+      </div>
     </div>
   );
 }
