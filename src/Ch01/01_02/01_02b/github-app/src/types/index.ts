@@ -5,4 +5,5 @@ export type TUser = {
   followers: number;
   following: number;
   public_repos: number;
+  login: string;
 }
