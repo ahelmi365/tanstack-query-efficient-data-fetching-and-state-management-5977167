@@ -1,6 +1,7 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { getUser } from "../../apis/user"
+import { useQueries } from "@tanstack/react-query";
+import { getUser } from "../../apis/user";
 import UserCard from "../../ui/userCard/UserCard";
+import "./styles.css";
 
 const ShowUser = () => {
 
@@ -25,7 +26,7 @@ const ShowUser = () => {
 
 
   return (
-    <div>
+    <div className="users-container">
       {results.map((result, index) => {
 
         return <UserCard key={index} user={result.data} />
